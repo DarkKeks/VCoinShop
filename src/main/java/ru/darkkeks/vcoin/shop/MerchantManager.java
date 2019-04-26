@@ -41,7 +41,8 @@ public class MerchantManager {
 
             if(Integer.parseInt(result.get("retval").getAsString()) == 0) {
                 shopDao.insertCode(code, vkId, referrer);
-                long amount = Math.round(Double.parseDouble(result.get("cnt_goods").getAsString()) * 1e6);
+                String amountString = result.get("cnt_goods").getAsString().replace(",", ".");
+                long amount = Math.round(Double.parseDouble(amountString) * 1e6);
                 return new CodeInfo(amount,
                         true,
                         false);
