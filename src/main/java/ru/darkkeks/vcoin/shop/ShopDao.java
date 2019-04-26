@@ -14,8 +14,8 @@ public class ShopDao {
     private final static Logger logger = LoggerFactory.getLogger(ShopDao.class);
 
     private final static String SELECT_COUNT = "SELECT transfered FROM used_codes WHERE code = ?";
-    private final static String INSERT = "INSERT INTO used_codes (code, user_id) VALUES (?, ?)" +
-            "ON CONFLICT (code) DO UPDATE SET user_id = excluded.user_id";
+    private final static String INSERT = "INSERT INTO used_codes (code, user_id, referrer) VALUES (?, ?, ?)" +
+            "ON CONFLICT (code) DO UPDATE SET user_id = excluded.user_id, time = now(), referrer = excluded.referrer";
     private final static String INSERT_MERCHANT = "INSERT INTO merchant_info (code, data) VALUES (?, ?) " +
             "ON CONFLICT DO NOTHING";
     private final static String CONFIRM = "UPDATE used_codes SET transfered = True WHERE code = ?";
@@ -54,11 +54,12 @@ public class ShopDao {
         }
     }
 
-    public void insertCode(String code, int userId) throws SQLException {
+    public void insertCode(String code, int userId, String referrer) throws SQLException {
         try(Connection connection = dataSource.getConnection();
             PreparedStatement statement = connection.prepareStatement(INSERT)) {
             statement.setString(1, code);
             statement.setInt(2, userId);
+            statement.setString(3, referrer);
             statement.execute();
         } catch (SQLException e) {
             logger.error("Insert", e);

@@ -25,7 +25,7 @@ public class MerchantManager {
         this.httpClient = httpClient;
     }
 
-    public CodeInfo useCode(String code, int vkId) throws Exception {
+    public CodeInfo useCode(String code, int vkId, String referrer) throws Exception {
         if(shopDao.isUsed(code)) {
             return new CodeInfo(-1, false, true);
         } else {
@@ -40,7 +40,7 @@ public class MerchantManager {
             shopDao.insertMerchantInfo(code, response);
 
             if(Integer.parseInt(result.get("retval").getAsString()) == 0) {
-                shopDao.insertCode(code, vkId);
+                shopDao.insertCode(code, vkId, referrer);
                 long amount = Math.round(Double.parseDouble(result.get("cnt_goods").getAsString()) * 1e6);
                 return new CodeInfo(amount,
                         true,

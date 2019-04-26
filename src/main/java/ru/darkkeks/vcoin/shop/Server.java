@@ -35,13 +35,14 @@ public class Server {
                 .addHttpListener(port, "0.0.0.0")
                 .setIoThreads(2)
                 .setWorkerThreads(2)
-                .setHandler(Handlers.path().addPrefixPath("/code", Handlers.path()
+                .setHandler(Handlers.path()
                         .addExactPath("/verify", this::handleTransfer)
-                        .addPrefixPath("/", Handlers.resource(new ClassPathResourceManager(getClass().getClassLoader(), "public/"))
+                        .addPrefixPath("/", Handlers
+                                .resource(new ClassPathResourceManager(getClass().getClassLoader(), "public/"))
                                 .setMimeMappings(MimeMappings.builder(true)
                                         .addMapping("html", "text/html;charset=utf-8")
                                         .build())
-                        )))
+                        ))
                 .build();
         server.start();
     }
@@ -53,19 +54,22 @@ public class Server {
 
         Optional<Integer> vkIdOptional = queryParam(exchange, "vk_id").map(Integer::parseInt);
         Optional<String> codeOptional = queryParam(exchange, "uniquecode").map(String::toLowerCase);
+        String referrer = queryParam(exchange, "referrer").orElse(null);
 
-        logger.info("ProcessCode(vkId={}, code={})", vkIdOptional.orElse(null), codeOptional.orElse(null));
+        logger.info("ProcessCode(vkId={}, code={}, referrer={})",
+                vkIdOptional.orElse(null), codeOptional.orElse(null), referrer);
         if(vkIdOptional.isPresent() && codeOptional.isPresent()) {
-            exchange.getResponseSender().send(gson.toJson(processCode(codeOptional.get(), vkIdOptional.get())));
+            exchange.getResponseSender().send(gson.toJson(processCode(codeOptional.get(), vkIdOptional.get(),
+                    referrer)));
         } else {
             exchange.getResponseSender().send(gson.toJson(Result.error(ResultError.HORSE)));
         }
         exchange.endExchange();
     }
 
-    private Result processCode(String code, Integer vkId) {
+    private Result processCode(String code, Integer vkId, String referrer) {
         try {
-            MerchantManager.CodeInfo info = merchantManager.useCode(code, vkId);
+            MerchantManager.CodeInfo info = merchantManager.useCode(code, vkId, referrer);
             logger.info("CodeInfo(valid={}, used={}, amount={})", info.isValid(), info.isUsed(), info.getAmount());
             if(!info.isUsed() && info.isValid()) {
                 try {
