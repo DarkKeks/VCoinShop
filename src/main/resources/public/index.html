@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>VCoinBank</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+	<link rel="apple-touch-icon" sizes="180x180" href="meta/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="meta/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="meta/favicon-16x16.png">
+	<link rel="manifest" href="meta/site.webmanifest">
+	<link rel="mask-icon" href="meta/safari-pinned-tab.svg" color="#d8c6e4">
+	<meta name="msapplication-TileColor" content="#d8c6e4">
+	<meta name="theme-color" content="#d8c6e4">
+
+	<style>
+		body {
+			background: url('img/background.png') no-repeat;
+			background-size: cover;
+		}
+		a {
+			color: white;
+		}
+		a:visited {
+			color: white;
+		}
+		a:hover{
+			color: white;
+		}
+
+		.content {
+			min-height: 100vh;
+		}
+	</style>
+</head>
+<body>
+	<div class="content">
+		<div class="container">
+			<div class="row">
+				<div class="d-none d-xl-block col-md-3">
+				</div>
+				<div class="col">
+					 <img src="img/logo.png" class="img-fluid" alt="VCoinBank">
+					 <div class="card text-white">
+						<div class="card-header"></div>
+						<div class="card-body"></div>
+						 <div class="card-footer">
+							 <div class="d-flex justify-content-center">
+								 <a href="https://vk.com/topic-180860084_39436736" class="btn btn-primary m-2 btn-block">Оставить отзыв</a>
+								 <a href="https://vk.com/im?media=&sel=456171173" class="btn btn-primary m-2 btn-block">Техническая поддержка</a>
+							 </div>
+						 </div>
+					</div>
+				</div>
+				<div class="d-none d-xl-block col-md-3">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+			integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+			crossorigin="anonymous" type="text/javascript"></script>
+
+	<script type="application/javascript">
+		jQuery.ajax('verify' + location.search)
+			.fail(() => {
+				$('.card').addClass('bg-danger');
+				$('.card-header').text("Неудачно");
+			})
+			.done(data => {
+				if(data.success) {
+					$('.card').addClass('bg-success');
+					$('.card-header').text("Успешно");
+					let text = `Спасибо за покупку! ${data.amount / 1e3} коинов были начислено @id${data.vkId}`;
+					$('.card-body').append($("<p>").text(text));
+				} else {
+					$('.card').addClass('bg-danger');
+					$('.card-header').text("Неудачно");
+
+					let text = `Вы конь`;
+					if(data.error === "INVALID") {
+						text = `Код уже использован или недействителен`;
+					} else if(data.error === "ERROR") {
+						text = `Попробуйте позже. Ваш код: ${data.code}`;
+					}
+					$('.card-body').append($("<p>").text(text));
+					if(data.message) {
+						$('.card-body').append($("<p>").text(data.message));
+					}
+				}
+			})
+	</script>
+</body>
+</html>
