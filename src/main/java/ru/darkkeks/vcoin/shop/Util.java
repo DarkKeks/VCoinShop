@@ -4,6 +4,7 @@ import org.apache.commons.codec.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.slf4j.Logger;
@@ -36,6 +37,19 @@ public class Util {
         }
     }
 
+    public static String get(HttpClient client, String url) throws IOException {
+        HttpGet request = new HttpGet(url);
+        try {
+            HttpResponse response = client.execute(request);
+
+            try(InputStream content = response.getEntity().getContent()) {
+                return IOUtils.toString(content, Charsets.UTF_8);
+            }
+        } catch (SocketException e) {
+            logger.error("Network error", e);
+            throw e;
+        }
+    }
 
     public static String md5(String string) {
         try {

@@ -27,7 +27,7 @@ public class MerchantManager {
 
     public CodeInfo useCode(String code, int vkId, String referrer) throws Exception {
         if(shopDao.isUsed(code)) {
-            return new CodeInfo(-1, false, true);
+            return new CodeInfo(-1, false, true, 0);
         } else {
             JsonObject data = new JsonObject();
             data.add("id_seller", new JsonPrimitive(id));
@@ -42,12 +42,12 @@ public class MerchantManager {
             if(Integer.parseInt(result.get("retval").getAsString()) == 0) {
                 shopDao.insertCode(code, vkId, referrer);
                 String amountString = result.get("cnt_goods").getAsString().replace(",", ".");
+                String profitString = result.get("profit").getAsString().replace(",", ".");
                 long amount = Math.round(Double.parseDouble(amountString) * 1e6);
-                return new CodeInfo(amount,
-                        true,
-                        false);
+                double profit = Double.parseDouble(profitString);
+                return new CodeInfo(amount, true, false, profit);
             } else {
-                return new CodeInfo(-1, false, false);
+                return new CodeInfo(-1, false, false, 0);
             }
         }
     }
@@ -66,11 +66,13 @@ public class MerchantManager {
         private boolean isUsed;
         private boolean valid;
         private long amount;
+        private double profit;
 
-        public CodeInfo(long amount, boolean valid, boolean isUsed) {
+        public CodeInfo(long amount, boolean valid, boolean isUsed, double profit) {
             this.amount = amount;
             this.valid = valid;
             this.isUsed = isUsed;
+            this.profit = profit;
         }
 
         public boolean isUsed() {
@@ -83,6 +85,10 @@ public class MerchantManager {
 
         public long getAmount() {
             return amount;
+        }
+
+        public double getProfit() {
+            return profit;
         }
     }
 

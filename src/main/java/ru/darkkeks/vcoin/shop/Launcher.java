@@ -33,10 +33,10 @@ public class Launcher {
         VCoinApi vCoinApi = new VCoinApi(VCOIN_ID, VCOIN_KEY, client);
         MerchantManager manager = new MerchantManager(MERCHANT_ID, MERCHANT_PASSWORD, new ShopDao(dataSource), client);
 
-        new Server(manager, vCoinApi).start(PORT);
+        new Server(manager, vCoinApi, client).start(PORT);
     }
 
-    private static String getEnv(String name) {
+    public static String getEnv(String name) {
         return Optional.ofNullable(System.getenv(name)).orElseThrow(() -> new IllegalStateException("Env " + name));
     }
 }
