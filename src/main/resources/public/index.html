@@ -66,25 +66,25 @@
 
 	<script type="application/javascript">
 		jQuery.ajax('verify' + location.search)
-			.fail(() => {
+			.fail(function() {
 				$('.card').addClass('bg-danger');
 				$('.card-header').text("Неудачно");
 			})
-			.done(data => {
+			.done(function(data) {
 				if(data.success) {
 					$('.card').addClass('bg-success');
 					$('.card-header').text("Успешно");
-					let text = `Спасибо за покупку! ${data.amount / 1e3} коинов были начислено @id${data.vkId}`;
+					var text = 'Спасибо за покупку! ' + data.amount / 1e3 + ' коинов были начислено @id' + data.vkId;
 					$('.card-body').append($("<p>").text(text));
 				} else {
 					$('.card').addClass('bg-danger');
 					$('.card-header').text("Неудачно");
 
-					let text = `Вы конь`;
+					var text = 'Вы конь';
 					if(data.error === "INVALID") {
-						text = `Код уже использован или недействителен`;
+						text = 'Код уже использован или недействителен';
 					} else if(data.error === "ERROR") {
-						text = `Что-то пошло не так... Попробуйте перезагрузить страницу немного позже! Ваш код (соxраните его): ${data.code}`;
+						text = 'Что-то пошло не так... Попробуйте перезагрузить страницу немного позже! Ваш код (сохраните его): ' + data.code;
 					}
 					$('.card-body').append($("<p>").text(text));
 					if(data.message) {
