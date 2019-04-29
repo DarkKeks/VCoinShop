@@ -27,7 +27,7 @@ public class MerchantManager {
 
     public CodeInfo useCode(String code, int vkId, String referrer) throws Exception {
         if(shopDao.isUsed(code)) {
-            return new CodeInfo(-1, false, true, 0);
+            return new CodeInfo(-1, false, true, 0, null);
         } else {
             JsonObject data = new JsonObject();
             data.add("id_seller", new JsonPrimitive(id));
@@ -37,17 +37,16 @@ public class MerchantManager {
             String response = Util.post(httpClient, MERCHANT_URL, data.toString());
             JsonObject result = parser.parse(response).getAsJsonObject();
 
-            shopDao.insertMerchantInfo(code, response);
-
             if(Integer.parseInt(result.get("retval").getAsString()) == 0) {
-                shopDao.insertCode(code, vkId, referrer);
                 String amountString = result.get("cnt_goods").getAsString().replace(",", ".");
                 String profitString = result.get("profit").getAsString().replace(",", ".");
                 long amount = Math.round(Double.parseDouble(amountString) * 1e6);
                 double profit = Double.parseDouble(profitString);
-                return new CodeInfo(amount, true, false, profit);
+                Currency currency = Currency.valueOf(result.get("type_curr").getAsString());
+                shopDao.insertCode(code, vkId, referrer, response, amount);
+                return new CodeInfo(amount, true, false, profit, currency);
             } else {
-                return new CodeInfo(-1, false, false, 0);
+                return new CodeInfo(-1, false, false, 0, null);
             }
         }
     }
@@ -67,12 +66,14 @@ public class MerchantManager {
         private boolean valid;
         private long amount;
         private double profit;
+        private Currency currency;
 
-        public CodeInfo(long amount, boolean valid, boolean isUsed, double profit) {
+        public CodeInfo(long amount, boolean valid, boolean isUsed, double profit, Currency currency) {
             this.amount = amount;
             this.valid = valid;
             this.isUsed = isUsed;
             this.profit = profit;
+            this.currency = currency;
         }
 
         public boolean isUsed() {
@@ -89,6 +90,27 @@ public class MerchantManager {
 
         public double getProfit() {
             return profit;
+        }
+
+        public Currency getCurrency() {
+            return currency;
+        }
+    }
+
+    public enum Currency {
+        WMR("₽"),
+        WMZ("$"),
+        WMX("₿"),
+        WME("€");
+
+        private String sign;
+
+        Currency(String sign) {
+            this.sign = sign;
+        }
+
+        public String getSign() {
+            return sign;
         }
     }
 

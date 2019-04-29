@@ -43,7 +43,7 @@ public class Server {
         server = Undertow.builder()
                 .addHttpListener(port, "0.0.0.0")
                 .setIoThreads(2)
-                .setWorkerThreads(2)
+                .setWorkerThreads(4)
                 .setHandler(Handlers.path()
                         .addExactPath("/verify", this::handleTransfer)
                         .addPrefixPath("/", Handlers
@@ -105,17 +105,20 @@ public class Server {
     private void notify(MerchantManager.CodeInfo codeInfo, Result result) {
         String message = String.format("#продажа\n" +
                         "```\n" +
-                        "Profit | %.3f₽\n" +
+                        "Profit | %.3f%s\n" +
                         "Amount | %.3f\n" +
                         "VkId   | %d\n" +
                         "Code   | %s\n" +
                         "Ref    | %s\n" +
                         "```",
-                codeInfo.getProfit(), result.getAmount() / 1e3, result.getVkId(), result.getCode(), result.getReferrer());
+                codeInfo.getProfit(), codeInfo.getCurrency().getSign(),
+                result.getAmount() / 1e3, result.getVkId(),
+                result.getCode(),
+                result.getReferrer());
 
         try {
             Util.get(httpClient, new URIBuilder(SEND_MESSAGE)
-                    .addParameter("chat_id", "-224400983")
+                    .addParameter("chat_id", "-1001289470782")
                     .addParameter("parse_mode", "Markdown")
                     .addParameter("disable_notification", "true")
                     .addParameter("disable_web_page_preview", "true")
